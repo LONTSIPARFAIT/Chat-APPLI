@@ -4,7 +4,6 @@ const MessagePage = () => {
   return (
     <div>
       MessagePage
-      jh
     </div>
   )
 }
