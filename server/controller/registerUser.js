@@ -1,20 +1,21 @@
 const UserModel = require("../models/UserModel");
 const bcryptjs = require('bcryptjs');
 
-async function registerUser(req,res) {
+async function registerUser(req, res) {
     try {
-        const {name, email, password, profil_pic} = req.body;
+        const { name, email, password, profil_pic } = req.body;
 
-        const checkEmail = await UserModel.findOne({ email }); //{ name,email } //null
+        // Vérifier si l'utilisateur existe déjà
+        const checkEmail = await UserModel.findOne({ email });
 
-        if(checkEmail) {
+        if (checkEmail) {
             return res.status(400).json({
                 message: "Cet Email existe déjà",
                 error: true
-            })
+            });
         }
 
-        // Hasharge du mot de passe
+        // Hachage du mot de passe
         const salt = await bcryptjs.genSalt(10);
         const hashedPassword = await bcryptjs.hash(password, salt);
 
@@ -23,8 +24,9 @@ async function registerUser(req,res) {
             email,
             profil_pic,
             password: hashedPassword,
-        }
+        };
 
+        // Créer le nouvel utilisateur
         const user = new UserModel(payload);
         const userSave = await user.save();
 
@@ -32,13 +34,13 @@ async function registerUser(req,res) {
             message: "Utilisateur enregistré avec succès",
             data: userSave,
             success: true
-        })
+        });
 
     } catch (error) {
         return res.status(500).json({
             message: error.message || error,
             error: true
-        })
+        });
     }
 }
 

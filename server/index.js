@@ -4,6 +4,7 @@ require("dotenv").config();
 const connectDB = require("./config/connectDB");
 const router = require("./routes/index");
 const cookiesParser = require("cookie-parser");
+// const { app, server } = require("./socket/index")
 
 const app = express();
 app.use(cors({
@@ -21,7 +22,7 @@ app.get("/", (req, res) => {
     })
 })
 
-//points de terminaison de l'API
+// Points de terminaison de l'API
 app.use("/api", router);
 
 
@@ -30,3 +31,9 @@ connectDB().then(() => {
         console.log(`Serveur demarré au port ${PORT} avec success`);
     })
 });
+
+// connectDB().then(() => {
+//     server.listen(PORT, () => {
+//         console.log(`Serveur demarré au port ${PORT} avec success`);
+//     })
+// });

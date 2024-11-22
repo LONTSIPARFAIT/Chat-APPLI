@@ -1,46 +1,91 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {  IoClose } from 'react-icons/io5';
+import uploadFile from "../helpers/uploadFile";
+import axios from "axios"
+import { toast } from 'react-hot-toast'
 
 const RegisterPage = () => {
-  const [date,setDate] = useState({
+  const [data,setData] = useState({
     name : "",
     email : "",
     password : "",
     profile_pic : ""
   })
   const [uploadPhoto,setUploadPhoto] = useState("")
+  const navigate = useNavigate()
 
   const handleOnchange = (e)=>{
     const { name,value } = e.target
 
-    setDate((preve)=>{
+    setData((preve)=>{
       return {
         ...preve,
         [name] : value,
       }
     })
   }
-  const handleUploadPhoto = (e)=>{
+  const handleUploadPhoto = async (e)=>{
     const file = e.target.files[0]
+
+    const uploadPhoto = await uploadFile(file)
+    // console.log('uploadPhoto',uploadPhoto);
     setUploadPhoto(file);
+
+    setData((preve)=>{
+      return{
+        ...preve,
+        profile_pic : uploadPhoto?.url
+      }
+    })
+
   }
+
   const handheClearUploadPhoto = (e)=>{
     e.stopPropagation()
     e.preventDefault()
     setUploadPhoto(null);
   }
-  const handleSubmit = (e)=>{
+
+  const handleSubmit = async(e)=>{
     e.preventDefault()
     e.stopPropagation()
+
+    const URL = `${process.env.REACT_APP_BACKEND_URL}/api/register`
+
+    try {
+      const response = await axios.post(URL,data)
+      toast.success(response.data.message)
+
+      if (response.data.success) {
+        setData({
+          name : "",
+          email : "",
+          password : "",
+          profile_pic : ""
+        })
+
+        navigate('/email')
+      }
+
+      console.log("response",response);
+      
+    } catch (error) {
+      toast.error(error?.response?.data?.message) 
+      console.log('error',error);
+      
+    }
+
+    console.log(data);
   }
 
   // console.log('uploadPhoto',uploadPhoto);
   
+  
     return (
       <div className="mt-5"> 
-        <div className="bg-white w-full max-w-sm  mx-2 rounded overflow-hidden p-4 ">
-          <h3>Bienvenue sur Perfect-App</h3>
+        <div className="bg-white w-full max-w-md  rounded overflow-hidden p-4 mx-auto">
+          <h3 className="text-2xl text-center font-bold mb-5">Bienvenue sur Perfect-App</h3>
 
           <form className="grid gap-4 mt-5" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-1">
@@ -49,7 +94,7 @@ const RegisterPage = () => {
                 id="name" name="name" 
                 placeholder="Entrer votre nom" 
                 className="bg-slate-100 px-3 py-1 rounded focus:outline-primary"
-                value={date.name}
+                value={data.name}
                 onChange={handleOnchange}
                 required
               />
@@ -60,7 +105,7 @@ const RegisterPage = () => {
                 id="email" name="email" 
                 placeholder="Entrer votre email" 
                 className="bg-slate-100 px-3 py-1 rounded focus:outline-primary"
-                value={date.email}
+                value={data.email}
                 onChange={handleOnchange}
                 required
               />
@@ -71,7 +116,7 @@ const RegisterPage = () => {
                 id="password" name="password"
                 placeholder="Entrer votre Mot de passe" 
                 className="bg-slate-100 px-3 py-1 rounded focus:outline-primary"
-                value={date.password}
+                value={data.password}
                 onChange={handleOnchange}
                 required
               />
@@ -104,7 +149,7 @@ const RegisterPage = () => {
               S'inscrire
             </button>
           </form>
-          <p>Vous avez déjà un compte? <Link to={"/email"} className="hover.">Se Connecter</Link></p>
+          <p className="my-3 text-center">Vous avez déjà un compte? <Link to={"/email"} className="hover:text-primary font-semibold">Se Connecter</Link></p>
         </div>
       </div>
     )
